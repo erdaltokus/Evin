@@ -1,0 +1,40 @@
+name: Zip'i Aç ve Kur
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Depoyu indir
+        uses: actions/checkout@v4
+
+      - name: Zip dosyasını bul ve aç
+        run: |
+          ZIP_FILE=$(find . -name "*.zip" -type f | head -1)
+          echo "Bulunan zip: $ZIP_FILE"
+          
+          if [ -z "$ZIP_FILE" ]; then
+            echo "Zip dosyası bulunamadı!"
+            exit 1
+          fi
+          
+          mkdir -p /tmp/extract
+          unzip -o "$ZIP_FILE" -d /tmp/extract
+          
+          if [ -d "/tmp/extract/NoteWidgetApp" ]; then
+            cp -r /tmp/extract/NoteWidgetApp/* .
+            cp -r /tmp/extract/NoteWidgetApp/.* . 2>/dev/null || true
+          else
+            cp -r /tmp/extract/* .
+          fi
+          
+          rm -f "$ZIP_FILE"
+          
+          echo "=== Dosya yapısı ==="
+          ls -la
+          echo "=== .
